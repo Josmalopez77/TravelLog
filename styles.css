@@ -716,9 +716,30 @@ body {
     padding: 40px;
     max-width: 500px;
     width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
     box-shadow: var(--shadow-lg);
     border: 1px solid rgba(255, 255, 255, 0.5);
     animation: scaleIn 0.3s ease-out;
+}
+
+/* Scrollbar styling */
+.modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: rgba(167, 139, 250, 0.1);
+    border-radius: 10px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: rgba(167, 139, 250, 0.5);
+    border-radius: 10px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(167, 139, 250, 0.7);
 }
 
 @keyframes scaleIn {
@@ -991,6 +1012,16 @@ body {
     
     .page-header h1 {
         font-size: 2rem;
+    }
+    
+    .modal-content {
+        padding: 30px;
+        border-radius: 20px;
+        max-height: 95vh;
+    }
+    
+    .modal-header h2 {
+        font-size: 1.5rem;
     }
     
     .photo-detail-grid {
