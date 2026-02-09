@@ -1,4 +1,4 @@
-import { auth, db } from './firebase-config.js';
+import { auth, db, firebaseConfig } from './firebase-config.js';
 import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import { 
     collection, 
@@ -156,10 +156,7 @@ async function loadUsers() {
 function getApiKey() {
     // Esta función extrae la API key del objeto firebaseConfig
     // La necesitamos para usar la REST API
-    const scriptContent = document.querySelector('script[src="firebase-config.js"]');
-    // Por ahora retornamos un placeholder
-    // El usuario necesitará configurar Cloud Functions para crear usuarios de forma segura
-    return 'YOUR_API_KEY'; // Esto se obtiene automáticamente del firebase-config
+    return firebaseConfig.apiKey;
 }
 
 // Error messages
