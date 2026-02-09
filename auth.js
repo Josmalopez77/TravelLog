@@ -1,8 +1,13 @@
-import { auth } from './firebase-config.js';
+import { auth, db } from './firebase-config.js';
 import { 
     signInWithEmailAndPassword,
     onAuthStateChanged 
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import {
+    doc,
+    getDoc,
+    setDoc
+} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 // Elements
 const loginForm = document.getElementById('loginForm');
@@ -16,7 +21,22 @@ loginForm.addEventListener('submit', async (e) => {
     const password = document.getElementById('loginPassword').value;
     
     try {
-        await signInWithEmailAndPassword(auth, email, password);
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        
+        // Check if user document exists in Firestore
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        
+        // If user document doesn't exist, create it
+        if (!userDocSnap.exists()) {
+            await setDoc(userDocRef, {
+                name: user.displayName || email.split('@')[0],
+                email: email,
+                createdAt: new Date().toISOString()
+            });
+        }
+        
         window.location.href = 'app.html';
     } catch (error) {
         console.error('Error logging in:', error);
