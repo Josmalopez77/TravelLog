@@ -1,4 +1,4 @@
-import { auth, db, storage } from './firebase-config.js';
+import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import { 
     collection, 
@@ -11,12 +11,10 @@ import {
     where,
     orderBy 
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-import { 
-    ref, 
-    uploadBytesResumable, 
-    getDownloadURL,
-    deleteObject 
-} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
+
+// Cloudinary Configuration
+const CLOUDINARY_CLOUD_NAME = 'dchjnshlx';
+const CLOUDINARY_UPLOAD_PRESET = 'travelog_upload';
 
 let currentUser = null;
 let profileUserId = null;
@@ -215,32 +213,35 @@ addPhotoForm.addEventListener('submit', async (e) => {
     const progressFill = document.getElementById('progressFill');
     const progressText = document.getElementById('progressText');
     uploadProgress.style.display = 'block';
+    progressText.textContent = 'Subiendo: 0%';
     
     try {
-        // Upload image to Firebase Storage
-        const storageRef = ref(storage, `photos/${currentUser.uid}/${Date.now()}_${file.name}`);
-        const uploadTask = uploadBytesResumable(storageRef, file);
+        // Upload image to Cloudinary
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+        formData.append('public_id', `travelog/${currentUser.uid}/${Date.now()}_${file.name.split('.')[0]}`);
         
-        uploadTask.on('state_changed',
-            (snapshot) => {
-                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        const xhr = new XMLHttpRequest();
+        
+        xhr.upload.addEventListener('progress', (e) => {
+            if (e.lengthComputable) {
+                const progress = (e.loaded / e.total) * 100;
                 progressFill.style.width = progress + '%';
                 progressText.textContent = `Subiendo: ${Math.round(progress)}%`;
-            },
-            (error) => {
-                console.error('Error uploading:', error);
-                alert('Error al subir la foto');
-                uploadProgress.style.display = 'none';
-            },
-            async () => {
-                // Upload completed
-                const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+            }
+        });
+        
+        xhr.addEventListener('load', async () => {
+            if (xhr.status === 200) {
+                const response = JSON.parse(xhr.responseText);
+                const imageUrl = response.secure_url;
                 
                 // Save photo data to Firestore
                 await addDoc(collection(db, 'photos'), {
                     userId: currentUser.uid,
-                    imageUrl: downloadURL,
-                    storagePath: uploadTask.snapshot.ref.fullPath,
+                    imageUrl: imageUrl,
+                    cloudinaryId: response.public_id,
                     description: description,
                     date: date,
                     location: location,
@@ -256,8 +257,19 @@ addPhotoForm.addEventListener('submit', async (e) => {
                 
                 // Reload photos
                 await loadPhotos();
+            } else {
+                throw new Error('Error en Cloudinary');
             }
-        );
+        });
+        
+        xhr.addEventListener('error', () => {
+            console.error('Error uploading:', xhr.statusText);
+            alert('Error al subir la foto');
+            uploadProgress.style.display = 'none';
+        });
+        
+        xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`);
+        xhr.send(formData);
     } catch (error) {
         console.error('Error adding photo:', error);
         alert('Error al agregar la foto');
@@ -305,14 +317,6 @@ deletePhotoBtn.addEventListener('click', async () => {
     }
     
     try {
-        // Get photo data
-        const photoDoc = await getDoc(doc(db, 'photos', currentPhotoId));
-        const photoData = photoDoc.data();
-        
-        // Delete from Storage
-        const storageRef = ref(storage, photoData.storagePath);
-        await deleteObject(storageRef);
-        
         // Delete from Firestore
         await deleteDoc(doc(db, 'photos', currentPhotoId));
         
