@@ -6,7 +6,9 @@ import {
     getDoc,
     query,
     where,
-    orderBy 
+    orderBy,
+    updateDoc,
+    increment
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 let profileUserId = null;
@@ -69,7 +71,7 @@ async function loadPhotos() {
             
             const photoCard = document.createElement('div');
             photoCard.className = 'photo-card';
-            photoCard.onclick = () => showPhotoDetail(photo);
+            photoCard.onclick = () => showPhotoDetail(photoId, photo);
             
             const formattedDate = new Date(photo.date).toLocaleDateString('es-ES', {
                 year: 'numeric',
@@ -77,12 +79,19 @@ async function loadPhotos() {
                 day: 'numeric'
             });
             
+            const likes = photo.likes ? photo.likes.length : 0;
+            const views = photo.views || 0;
+            
             photoCard.innerHTML = `
                 <img src="${photo.imageUrl}" alt="${photo.location || 'Foto'}">
                 <div class="photo-info">
                     <p class="photo-location">${photo.location || 'Sin ubicación'}</p>
                     <p class="photo-date">${formattedDate}</p>
                     ${photo.description ? `<p class="photo-description">${photo.description}</p>` : ''}
+                    <div class="photo-stats-card">
+                        <span>♡ ${likes}</span>
+                        <span>👁️ ${views}</span>
+                    </div>
                 </div>
             `;
             
@@ -102,7 +111,7 @@ closeDetailModal.addEventListener('click', () => {
     photoDetailModal.classList.remove('active');
 });
 
-function showPhotoDetail(photo) {
+function showPhotoDetail(photoId, photo) {
     document.getElementById('detailImage').src = photo.imageUrl;
     document.getElementById('detailLocation').textContent = photo.location || 'Sin ubicación';
     document.getElementById('detailDescription').textContent = photo.description || 'Sin descripción';
@@ -113,6 +122,16 @@ function showPhotoDetail(photo) {
         day: 'numeric'
     });
     document.getElementById('detailDate').textContent = formattedDate;
+    
+    // Increment views
+    try {
+        const photoRef = doc(db, 'photos', photoId);
+        updateDoc(photoRef, {
+            views: increment(1)
+        });
+    } catch (error) {
+        console.error('Error incrementing views:', error);
+    }
     
     photoDetailModal.classList.add('active');
 }

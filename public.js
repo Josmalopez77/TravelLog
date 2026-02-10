@@ -8,13 +8,13 @@ import {
     orderBy 
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-// Load all users' albums (public view)
+// Load all users' albums (public view only)
 async function loadAlbums() {
     const albumsGrid = document.getElementById('albumsGrid');
     albumsGrid.innerHTML = '<div class="loading">Cargando álbumes...</div>';
     
     try {
-        // Get all users
+        // Get all public users
         const usersSnapshot = await getDocs(collection(db, 'users'));
         
         if (usersSnapshot.empty) {
@@ -24,10 +24,15 @@ async function loadAlbums() {
         
         albumsGrid.innerHTML = '';
         
-        // Create album card for each user
+        // Create album card for each user with public album
         for (const userDoc of usersSnapshot.docs) {
             const userData = userDoc.data();
             const userId = userDoc.id;
+            
+            // Skip private albums
+            if (userData.isPublic === false) {
+                continue;
+            }
             
             // Get user's photos to get a cover image
             const photosQuery = query(
@@ -63,6 +68,10 @@ async function loadAlbums() {
             `;
             
             albumsGrid.appendChild(albumCard);
+        }
+        
+        if (albumsGrid.children.length === 0) {
+            albumsGrid.innerHTML = '<p class="empty-state">No hay álbumes públicos todavía</p>';
         }
     } catch (error) {
         console.error('Error loading albums:', error);

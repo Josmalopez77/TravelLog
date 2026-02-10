@@ -5,15 +5,18 @@ Una hermosa red social para un grupo de amigos con salidas mensuales. Tiene una 
 ## 🌟 Características
 
 ### Página Pública (Sin Login)
-- Ver álbumes de todos los miembros
+- Ver álbumes públicos de miembros
 - Explorar fotos con descripciones
+- Ver likes y vistas de fotos
 - Diseño hermoso con colores pastel
 
 ### Área de Miembros (Con Login)
-- **Feed**: Ver álbumes de todos con acceso completo
-- **Mi Álbum**: Subir y administrar tus fotos
-- **Votaciones**: Sugerir lugares y votar por próximas salidas
+- **Feed**: Ver todos los álbumes del grupo (públicos y privados)
+- **Mi Álbum**: Subir y administrar tus fotos, cambiar entre público/privado
+- **Votaciones**: Sugerir lugares con imágenes, votar por próximas salidas
 - **Panel Admin**: Solo para el administrador, crear usuarios
+- **Likes y Vistas**: Ver y dar like a fotos, contar vistas
+- **Confirmación Automática**: Si todos votan un lugar, se confirma automáticamente
 
 ## 📁 Estructura
 
@@ -198,21 +201,71 @@ Firebase Console > Authentication > Settings > Authorized domains
 ## 📱 Uso de la Aplicación
 
 ### Para Visitantes (Sin cuenta)
-- Abre `index.html` (o tu URL de GitHub Pages)
-- Explora los álbumes de todos los miembros
+- Abre `index.html` (o tu URL de GitHub Pages)  
+- Explora los álbumes públicos de los miembros
 - Haz clic en cualquier álbum para ver las fotos
+- Ve los likes y vistas de cada foto
 
 ### Para Miembros
 1. Haz clic en "Acceso Miembros"
 2. Inicia sesión con tu email y contraseña
-3. **Feed**: Ve los álbumes de todos
-4. **Mi Álbum**: Sube fotos con fecha, descripción y ubicación
-5. **Votaciones**: Sugiere lugares y vota
-6. El que propuso puede confirmar su lugar como ganador
+3. **Feed**: Ve los álbumes de todos del grupo (públicos y privados)
+4. **Mi Álbum**: 
+   - Sube fotos con fecha, descripción y ubicación
+   - Selecciona "Público" o "Privado" para tu álbum
+   - Público: visible para todos (aparece en página de inicio)
+   - Privado: solo visible para miembros del grupo
+5. **Ver Likes y Vistas**: En las fotos puedes ver cuántos likes y vistas tienen
+6. **Votaciones**: 
+   - Sugiere lugares con descripción e imagen
+   - Vota por los lugares que te gusten
+   - Elimina tus propias sugerencias si quieres
+   - Si todos los miembros votan el mismo lugar, se confirma automáticamente
+7. El que propuso puede confirmar su lugar como ganador manualmente
 
 ### Para el Admin
 - Todo lo anterior, más:
 - **Panel Admin**: Crear nuevas cuentas para el equipo
+
+## ✨ Nuevas Funcionalidades
+
+### 1. Sugerencias con Imágenes
+- Al sugerir un lugar, ahora puedes subir una imagen
+- La imagen aparece en la tarjeta de sugerencia para ayudar a decidir
+- Las imágenes se optimizan automáticamente
+
+### 2. Eliminar Sugerencias
+- Si eres el autor, puedes eliminar tu sugerencia
+- Solo tú puedes eliminar tus propias sugerencias
+- Aparece un botón "Eliminar sugerencia" en tu tarjeta
+
+### 3. Sistema Automático de Votos
+- Cuando todos los miembros del grupo votan un lugar, se confirma automáticamente
+- No necesitas confirmación manual si hay unanimidad
+- El lugar se agrega a "Próximas salidas" automáticamente
+- La sugerencia se elimina de las votaciones en curso
+
+### 4. Likes en Fotos
+- Haz click en el corazón para dar like a una foto
+- Ver cuántos likes tiene cada foto
+- El contador se actualiza en tiempo real
+
+### 5. Contador de Vistas
+- Cada vez que alguien ve una foto en detalle, se cuenta como una vista
+- Ver el número de vistas en cada foto
+- Útil para ver qué fotos son las más populares
+
+### 6. Álbum Público/Privado
+- En tu perfil (Mi Álbum), hay un selector de visibilidad
+- **Público**: Tu álbum aparece en la página de inicio para todos
+- **Privado**: Solo los miembros del grupo ven tu álbum
+- Puedes cambiar esto en cualquier momento
+- El Feed del grupo siempre muestra todos los álbumes (públicos y privados)
+
+### 7. Diferencia entre Página Pública y Feed del Grupo
+- **Página Pública** (index.html): Solo muestra álbumes públicos
+- **Feed del Grupo** (app.html): Muestra todos los álbumes (públicos y privados)
+- Solo los miembros autenticados pueden acceder al Feed del Grupo
 
 ## 🎨 Personalización
 
@@ -268,6 +321,7 @@ npx serve
 {
   name: "Nombre del usuario",
   email: "email@ejemplo.com",
+  isPublic: true,  // true = álbum visible públicamente, false = solo en grupo
   createdAt: "2024-01-01T00:00:00.000Z"
 }
 ```
@@ -277,10 +331,11 @@ npx serve
 {
   userId: "uid-del-usuario",
   imageUrl: "https://...",
-  storagePath: "photos/uid/imagen.jpg",
   description: "Descripción de la foto",
   date: "2024-01-15",
   location: "Nombre del lugar",
+  likes: ["uid1", "uid2"],  // Array de UIDs que dieron like
+  views: 15,  // Contador de vistas
   createdAt: "2024-01-15T10:30:00.000Z"
 }
 ```
@@ -292,6 +347,7 @@ npx serve
   description: "Por qué deberíamos ir",
   month: "Marzo",
   authorId: "uid-del-autor",
+  imageUrl: "https://...",  // Imagen del lugar sugerido (opcional)
   votes: ["uid1", "uid2", "uid3"],
   createdAt: "2024-01-01T00:00:00.000Z"
 }
@@ -304,6 +360,7 @@ npx serve
   month: "Marzo",
   date: "2024-03-15",
   confirmedBy: "uid-del-usuario",
+  autoConfirmed: false,  // true si se confirmó automáticamente
   createdAt: "2024-01-01T00:00:00.000Z"
 }
 ```

@@ -30,6 +30,13 @@
             <div class="profile-info">
                 <h1 id="profileName">Cargando...</h1>
                 <p class="profile-subtitle" id="profileSubtitle">Tu resumen del año</p>
+                <div class="profile-visibility" id="visibilityContainer" style="display: none;">
+                    <label for="albumVisibility">Álbum </label>
+                    <select id="albumVisibility">
+                        <option value="public">Público</option>
+                        <option value="private">Privado</option>
+                    </select>
+                </div>
             </div>
             <button id="addPhotoBtn" class="btn btn-primary" style="display: none;">Agregar Foto</button>
         </div>
@@ -90,6 +97,12 @@
                     <h3 id="detailLocation">Lugar</h3>
                     <p class="detail-date" id="detailDate">Fecha</p>
                     <p class="detail-description" id="detailDescription">Descripción</p>
+                    <div class="photo-stats">
+                        <button id="likeBtn" class="btn btn-like">
+                            <span id="likeIcon">♡</span> Likes: <span id="likeCount">0</span>
+                        </button>
+                        <span class="view-count">👁️ Vistas: <span id="viewCount">0</span></span>
+                    </div>
                     <button id="deletePhotoBtn" class="btn btn-danger" style="display: none;">Eliminar foto</button>
                 </div>
             </div>

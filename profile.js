@@ -6,10 +6,14 @@ import {
     getDocs,
     doc,
     getDoc,
+    updateDoc,
     deleteDoc,
     query,
     where,
-    orderBy 
+    orderBy,
+    arrayUnion,
+    arrayRemove,
+    increment
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 // Cloudinary Configuration
@@ -58,6 +62,7 @@ onAuthStateChanged(auth, async (user) => {
     // Show add photo button only for own profile
     if (isOwnProfile) {
         document.getElementById('addPhotoBtn').style.display = 'block';
+        document.getElementById('visibilityContainer').style.display = 'flex';
     }
     
     // Load profile
@@ -91,6 +96,21 @@ async function loadProfile() {
         
         if (isOwnProfile) {
             document.getElementById('profileSubtitle').textContent = 'Tu resumen del año';
+            
+            // Set visibility selector
+            const albumVisibility = document.getElementById('albumVisibility');
+            albumVisibility.value = userData.isPublic !== false ? 'public' : 'private';
+            
+            // Listen for visibility changes
+            albumVisibility.addEventListener('change', async (e) => {
+                try {
+                    await updateDoc(doc(db, 'users', profileUserId), {
+                        isPublic: e.target.value === 'public'
+                    });
+                } catch (error) {
+                    console.error('Error updating visibility:', error);
+                }
+            });
         } else {
             document.getElementById('profileSubtitle').textContent = `Álbum de ${userData.name}`;
         }
@@ -137,12 +157,19 @@ async function loadPhotos() {
                 day: 'numeric'
             });
             
+            const likes = photo.likes ? photo.likes.length : 0;
+            const views = photo.views || 0;
+            
             photoCard.innerHTML = `
                 <img src="${photo.imageUrl}" alt="${photo.location || 'Foto'}">
                 <div class="photo-info">
                     <p class="photo-location">${photo.location || 'Sin ubicación'}</p>
                     <p class="photo-date">${formattedDate}</p>
                     ${photo.description ? `<p class="photo-description">${photo.description}</p>` : ''}
+                    <div class="photo-stats-card">
+                        <span>♡ ${likes}</span>
+                        <span>👁️ ${views}</span>
+                    </div>
                 </div>
             `;
             
@@ -299,6 +326,48 @@ async function showPhotoDetail(photoId, photo) {
         day: 'numeric'
     });
     document.getElementById('detailDate').textContent = formattedDate;
+    
+    // Update likes and views
+    const likes = photo.likes ? photo.likes.length : 0;
+    const views = photo.views || 0;
+    const hasLiked = photo.likes && photo.likes.includes(currentUser.uid);
+    
+    document.getElementById('likeCount').textContent = likes;
+    document.getElementById('viewCount').textContent = views;
+    const likeIcon = document.getElementById('likeIcon');
+    likeIcon.textContent = hasLiked ? '♥' : '♡';
+    
+    // Like button handler
+    const likeBtn = document.getElementById('likeBtn');
+    likeBtn.onclick = async () => {
+        try {
+            const photoRef = doc(db, 'photos', photoId);
+            if (hasLiked) {
+                await updateDoc(photoRef, {
+                    likes: arrayRemove(currentUser.uid)
+                });
+            } else {
+                await updateDoc(photoRef, {
+                    likes: arrayUnion(currentUser.uid)
+                });
+            }
+            const updatedPhoto = (await getDoc(photoRef)).data();
+            await showPhotoDetail(photoId, updatedPhoto);
+            await loadPhotos();
+        } catch (error) {
+            console.error('Error toggling like:', error);
+        }
+    };
+    
+    // Increment views
+    try {
+        const photoRef = doc(db, 'photos', photoId);
+        await updateDoc(photoRef, {
+            views: increment(1)
+        });
+    } catch (error) {
+        console.error('Error incrementing views:', error);
+    }
     
     // Show delete button only for own photos
     if (isOwnProfile) {

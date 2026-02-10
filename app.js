@@ -6,7 +6,8 @@ import {
     doc, 
     getDoc,
     query,
-    orderBy 
+    orderBy,
+    where
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 let currentUser = null;
@@ -46,7 +47,7 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
     }
 });
 
-// Load all users' albums
+// Load all users' albums (group view - all albums visible)
 async function loadAlbums() {
     const albumsGrid = document.getElementById('albumsGrid');
     albumsGrid.innerHTML = '<div class="loading">Cargando álbumes...</div>';

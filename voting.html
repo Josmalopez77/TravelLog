@@ -68,6 +68,11 @@
                     <textarea id="placeDescription" rows="3" required placeholder="¿Qué tiene de especial este lugar?"></textarea>
                 </div>
                 <div class="form-group">
+                    <label for="placeImage">Imagen del lugar</label>
+                    <input type="file" id="placeImage" accept="image/*" placeholder="Sube una foto del lugar">
+                    <div id="imagePreviewSuggest" class="image-preview"></div>
+                </div>
+                <div class="form-group">
                     <label for="placeMonth">Mes propuesto</label>
                     <select id="placeMonth" required>
                         <option value="">Selecciona un mes</option>
@@ -88,6 +93,12 @@
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" id="cancelSuggestBtn">Cancelar</button>
                     <button type="submit" class="btn btn-primary">Sugerir</button>
+                </div>
+                <div id="uploadProgressSuggest" class="upload-progress" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFillSuggest"></div>
+                    </div>
+                    <p id="progressTextSuggest">Subiendo...</p>
                 </div>
             </form>
         </div>
