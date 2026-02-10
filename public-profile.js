@@ -21,6 +21,71 @@ if (!profileUserId) {
     window.location.href = 'index.html';
 }
 
+// Share album
+document.getElementById('shareAlbumBtn').addEventListener('click', async () => {
+    const shareUrl = `${window.location.origin}${window.location.pathname}?uid=${profileUserId}`;
+    
+    try {
+        // Try to use Web Share API if available (mobile)
+        if (navigator.share) {
+            const userDoc = await getDoc(doc(db, 'users', profileUserId));
+            const userName = userDoc.exists() ? userDoc.data().name : 'Usuario';
+            
+            await navigator.share({
+                title: `Álbum de ${userName} - Travelog`,
+                text: `Mira el álbum de ${userName} en Travelog`,
+                url: shareUrl
+            });
+        } else {
+            // Fallback: copy to clipboard
+            await navigator.clipboard.writeText(shareUrl);
+            showShareNotification();
+        }
+    } catch (error) {
+        // If share was cancelled or clipboard failed, try clipboard again
+        if (error.name !== 'AbortError') {
+            try {
+                await navigator.clipboard.writeText(shareUrl);
+                showShareNotification();
+            } catch (clipboardError) {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = shareUrl;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showShareNotification();
+                } catch (e) {
+                    alert('Enlace del álbum: ' + shareUrl);
+                }
+                document.body.removeChild(textArea);
+            }
+        }
+    }
+});
+
+// Show share notification
+function showShareNotification() {
+    const notification = document.createElement('div');
+    notification.className = 'share-notification';
+    notification.textContent = '✓ Enlace copiado al portapapeles';
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 10);
+    
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
+}
+
 // Load profile and photos
 async function loadProfile() {
     try {

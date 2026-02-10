@@ -227,9 +227,17 @@ async function checkIfAllVoted(suggestionId) {
         const suggestion = suggestionDoc.data();
         const votes = suggestion.votes ? suggestion.votes.length : 0;
         
-        // Get total group members
+        // Get total group members (only users with inGroup: true)
         const usersSnapshot = await getDocs(collection(db, 'users'));
-        const totalMembers = usersSnapshot.size;
+        const groupMembers = [];
+        usersSnapshot.forEach((doc) => {
+            const userData = doc.data();
+            // Users with inGroup === false are not counted, others are (default true)
+            if (userData.inGroup !== false) {
+                groupMembers.push(doc.id);
+            }
+        });
+        const totalMembers = groupMembers.length;
         
         // If all members voted, auto-confirm
         if (votes >= totalMembers && totalMembers > 0) {

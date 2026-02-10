@@ -38,7 +38,12 @@
                     </select>
                 </div>
             </div>
-            <button id="addPhotoBtn" class="btn btn-primary" style="display: none;">Agregar Foto</button>
+            <div class="profile-actions">
+                <button id="shareAlbumBtn" class="btn btn-secondary" title="Compartir álbum">
+                    <span class="share-icon">🔗</span> Compartir
+                </button>
+                <button id="addPhotoBtn" class="btn btn-primary" style="display: none;">Agregar Foto</button>
+            </div>
         </div>
 
         <div class="photos-container" id="photosContainer">
@@ -99,9 +104,11 @@
                     <p class="detail-description" id="detailDescription">Descripción</p>
                     <div class="photo-stats">
                         <button id="likeBtn" class="btn btn-like">
-                            <span id="likeIcon">♡</span> Likes: <span id="likeCount">0</span>
+                            <span id="likeIcon">♡</span> <span id="likeCount">0</span>
                         </button>
-                        <span class="view-count">👁️ Vistas: <span id="viewCount">0</span></span>
+                        <div class="view-count">
+                            <span>👁️</span> <span id="viewCount">0</span>
+                        </div>
                     </div>
                     <button id="deletePhotoBtn" class="btn btn-danger" style="display: none;">Eliminar foto</button>
                 </div>

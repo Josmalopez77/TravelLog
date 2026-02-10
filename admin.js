@@ -5,7 +5,8 @@ import {
     getDocs,
     doc,
     getDoc,
-    setDoc
+    setDoc,
+    updateDoc
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 let currentUser = null;
@@ -58,6 +59,7 @@ createUserForm.addEventListener('submit', async (e) => {
     const name = document.getElementById('newUserName').value.trim();
     const email = document.getElementById('newUserEmail').value.trim();
     const password = document.getElementById('newUserPassword').value;
+    const addToGroup = document.getElementById('addToGroup').checked;
     
     createSuccess.classList.remove('show');
     createError.classList.remove('show');
@@ -92,11 +94,14 @@ createUserForm.addEventListener('submit', async (e) => {
         await setDoc(doc(db, 'users', newUserId), {
             name: name,
             email: email,
+            inGroup: addToGroup,
+            isPublic: true,
             createdAt: new Date().toISOString(),
             createdBy: currentUser.uid
         });
         
-        createSuccess.textContent = `Usuario ${name} creado exitosamente`;
+        const groupStatus = addToGroup ? '(miembro del grupo)' : '(solo álbum)';
+        createSuccess.textContent = `Usuario ${name} creado exitosamente ${groupStatus}`;
         createSuccess.classList.add('show');
         createUserForm.reset();
         
@@ -127,21 +132,30 @@ async function loadUsers() {
         
         usersList.innerHTML = '';
         
-        usersSnapshot.forEach((doc) => {
-            const user = doc.data();
-            const userId = doc.id;
+        usersSnapshot.forEach((docSnapshot) => {
+            const user = docSnapshot.data();
+            const userId = docSnapshot.id;
             
             const userItem = document.createElement('div');
             userItem.className = 'user-item';
             
             const isAdmin = user.email === ADMIN_EMAIL;
+            const inGroup = user.inGroup !== false; // Por defecto true si no existe
             
             userItem.innerHTML = `
                 <div class="user-info">
                     <h4>${user.name}</h4>
                     <p>${user.email}</p>
+                    <span class="user-status ${inGroup ? 'in-group' : 'no-group'}">${inGroup ? '👥 En el grupo' : '📷 Solo álbum'}</span>
                 </div>
-                ${isAdmin ? '<span class="user-badge">Admin</span>' : ''}
+                <div class="user-actions">
+                    ${isAdmin ? '<span class="user-badge">Admin</span>' : ''}
+                    ${!isAdmin ? `
+                        <button class="btn btn-small ${inGroup ? 'btn-secondary' : 'btn-primary'}" onclick="toggleUserGroup('${userId}', ${inGroup})">
+                            ${inGroup ? 'Quitar del grupo' : 'Agregar al grupo'}
+                        </button>
+                    ` : ''}
+                </div>
             `;
             
             usersList.appendChild(userItem);
@@ -151,6 +165,19 @@ async function loadUsers() {
         usersList.innerHTML = '<p class="empty-state">Error al cargar usuarios</p>';
     }
 }
+
+// Toggle user group membership
+window.toggleUserGroup = async function(userId, currentlyInGroup) {
+    try {
+        await updateDoc(doc(db, 'users', userId), {
+            inGroup: !currentlyInGroup
+        });
+        await loadUsers();
+    } catch (error) {
+        console.error('Error updating user group:', error);
+        alert('Error al actualizar el usuario');
+    }
+};
 
 // Get API key from firebase config
 function getApiKey() {

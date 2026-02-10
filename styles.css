@@ -990,6 +990,87 @@ body {
     animation: fadeIn 0.4s ease;
 }
 
+.error-message {
+    color: #EF4444;
+    font-size: 0.85rem;
+    margin-top: 10px;
+    display: none;
+    padding: 12px;
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: 10px;
+}
+
+.error-message.show {
+    display: block;
+    animation: fadeIn 0.4s ease;
+}
+
+/* Checkbox label */
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    color: var(--text);
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.checkbox-label span {
+    user-select: none;
+}
+
+/* User status badges */
+.user-status {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-top: 8px;
+}
+
+.user-status.in-group {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10B981;
+}
+
+.user-status.no-group {
+    background: rgba(139, 92, 246, 0.1);
+    color: #8B5CF6;
+}
+
+/* User item layout */
+.user-item {
+    background: var(--gradient-card);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid rgba(167, 139, 250, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.user-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-small {
+    padding: 8px 16px !important;
+    font-size: 0.85rem !important;
+}
+
 /* Suggestion image styles */
 .suggestion-image {
     width: 100%;
@@ -1042,34 +1123,53 @@ body {
 /* Photo stats */
 .photo-stats {
     display: flex;
-    gap: 10px;
-    margin-top: 15px;
+    gap: 15px;
+    margin-top: 20px;
     align-items: center;
     flex-wrap: wrap;
 }
 
 .btn-like {
     background: transparent !important;
-    border: 2px solid #FCA5A5 !important;
-    color: #FCA5A5 !important;
-    padding: 8px 14px !important;
-    border-radius: 8px;
-    font-size: 0.9rem !important;
-    cursor: pointer;
-    transition: all 0.3s ease;
+    border: 2px solid #F472B6 !important;
+    color: #F472B6 !important;
+    padding: 10px 18px !important;
+    border-radius: 10px !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
 }
 
 .btn-like:hover {
-    background: #FCA5A5 !important;
+    background: #F472B6 !important;
+    color: var(--white) !important;
+    transform: scale(1.05);
+}
+
+.btn-like.liked {
+    background: #F472B6 !important;
     color: var(--white) !important;
 }
 
+.btn-like #likeIcon {
+    font-size: 1.2rem;
+    display: inline-block;
+}
+
 .view-count {
-    font-size: 0.9rem;
+    font-size: 1rem;
     color: var(--text-light);
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 8px;
+    padding: 10px 15px;
+    background: rgba(167, 139, 250, 0.1);
+    border-radius: 10px;
+    font-weight: 500;
 }
 
 /* Photo stats card */
@@ -1085,6 +1185,65 @@ body {
     display: flex;
     align-items: center;
     gap: 3px;
+}
+
+/* Profile actions */
+.profile-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* Share button */
+#shareAlbumBtn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+#shareAlbumBtn:hover {
+    transform: translateY(-2px);
+}
+
+.share-icon {
+    font-size: 1.2rem;
+}
+
+/* Share notification */
+.share-notification {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+    color: white;
+    padding: 15px 30px;
+    border-radius: 50px;
+    box-shadow: 0 8px 32px rgba(16, 185, 129, 0.4);
+    font-weight: 600;
+    z-index: 10000;
+    opacity: 0;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+}
+
+.share-notification.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Profile header public */
+.profile-header-public {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid rgba(167, 139, 250, 0.1);
+    flex-wrap: wrap;
+    gap: 20px;
 }
 
 /* Image preview */
@@ -1165,6 +1324,10 @@ body {
         grid-template-columns: 1fr;
     }
     
+    .photo-detail-info {
+        padding: 20px;
+    }
+    
     .albums-grid,
     .photos-container,
     .suggestions-grid {
@@ -1173,5 +1336,63 @@ body {
     
     .admin-section {
         grid-template-columns: 1fr;
+    }
+    
+    .photo-stats {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+    
+    .btn-like {
+        justify-content: center;
+        width: 100%;
+    }
+    
+    .view-count {
+        justify-content: center;
+        width: 100%;
+    }
+    
+    .profile-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+    
+    .profile-header-public {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .profile-actions {
+        width: 100%;
+        justify-content: stretch;
+    }
+    
+    .profile-actions button {
+        flex: 1;
+    }
+    
+    .profile-visibility {
+        width: 100%;
+    }
+    
+    .profile-visibility select {
+        width: 100%;
+    }
+    
+    .user-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .user-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+    
+    .photo-stats-card {
+        justify-content: center;
     }
 }

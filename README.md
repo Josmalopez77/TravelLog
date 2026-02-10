@@ -193,10 +193,28 @@ Firebase Console > Authentication > Settings > Authorized domains
    - Nombre del nuevo miembro
    - Email
    - Contraseña temporal
+   - **Checkbox "Agregar al grupo":**
+     - ✅ Marcado: Usuario puede votar, ver votaciones, aparece en conteo de votos
+     - ❌ Sin marcar: Usuario solo tiene álbum, no participa en votaciones ni salidas
 4. Haz clic en "Crear Usuario"
-5. Comparte las credenciales con el nuevo miembro
+5. Puedes cambiar el estado de grupo después con el botón "Agregar/Quitar del grupo"
+6. Comparte las credenciales con el nuevo miembro
 
 **Nota**: La creación de usuarios usa la API de Firebase. Si tienes problemas, considera usar Firebase Cloud Functions para mayor seguridad.
+
+### Usuarios del Grupo vs Solo Álbum
+
+**Usuarios en el Grupo** (inGroup: true):
+- Pueden votar en sugerencias
+- Participan en salidas y votaciones
+- Se cuentan para confirmación automática
+- Ven todos los álbumes en el Feed
+
+**Usuarios Solo Álbum** (inGroup: false):
+- Solo pueden subir fotos a su álbum
+- No ven ni participan en votaciones
+- No se cuentan para el sistema de votos
+- Perfecto para amigos/familia que quieren compartir fotos pero no van a las salidas
 
 ## 📱 Uso de la Aplicación
 
@@ -267,6 +285,22 @@ Firebase Console > Authentication > Settings > Authorized domains
 - **Feed del Grupo** (app.html): Muestra todos los álbumes (públicos y privados)
 - Solo los miembros autenticados pueden acceder al Feed del Grupo
 
+### 8. Usuarios Sin Grupo (Solo Álbum)
+- El admin puede crear usuarios que NO pertenecen al grupo
+- Estos usuarios solo tienen su álbum de fotos
+- No ven ni participan en votaciones
+- No se cuentan para el sistema de confirmación automática
+- Perfecto para familiares o amigos que quieren compartir fotos pero no van a salidas
+- El admin puede cambiar el estado después con el botón "Agregar/Quitar del grupo"
+
+### 9. Compartir Álbum
+- Botón "Compartir" en cada álbum
+- En móvil: Usa el menú compartir nativo del dispositivo
+- En escritorio: Copia el enlace al portapapeles
+- Funciona en álbumes públicos y privados
+- Enlace directo al álbum del usuario
+- Notificación visual cuando se copia el enlace
+
 ## 🎨 Personalización
 
 ### Cambiar Nombre
@@ -322,6 +356,7 @@ npx serve
   name: "Nombre del usuario",
   email: "email@ejemplo.com",
   isPublic: true,  // true = álbum visible públicamente, false = solo en grupo
+  inGroup: true,   // true = participa en votaciones y salidas, false = solo álbum
   createdAt: "2024-01-01T00:00:00.000Z"
 }
 ```

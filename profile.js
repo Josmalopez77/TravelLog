@@ -79,6 +79,71 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
     }
 });
 
+// Share album
+document.getElementById('shareAlbumBtn').addEventListener('click', async () => {
+    const shareUrl = `${window.location.origin}${window.location.pathname}?uid=${profileUserId}`;
+    
+    try {
+        // Try to use Web Share API if available (mobile)
+        if (navigator.share) {
+            const userDoc = await getDoc(doc(db, 'users', profileUserId));
+            const userName = userDoc.exists() ? userDoc.data().name : 'Usuario';
+            
+            await navigator.share({
+                title: `Álbum de ${userName} - Travelog`,
+                text: `Mira el álbum de ${userName} en Travelog`,
+                url: shareUrl
+            });
+        } else {
+            // Fallback: copy to clipboard
+            await navigator.clipboard.writeText(shareUrl);
+            showShareNotification();
+        }
+    } catch (error) {
+        // If share was cancelled or clipboard failed, try clipboard again
+        if (error.name !== 'AbortError') {
+            try {
+                await navigator.clipboard.writeText(shareUrl);
+                showShareNotification();
+            } catch (clipboardError) {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = shareUrl;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showShareNotification();
+                } catch (e) {
+                    alert('Enlace del álbum: ' + shareUrl);
+                }
+                document.body.removeChild(textArea);
+            }
+        }
+    }
+});
+
+// Show share notification
+function showShareNotification() {
+    const notification = document.createElement('div');
+    notification.className = 'share-notification';
+    notification.textContent = '✓ Enlace copiado al portapapeles';
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 10);
+    
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
+}
+
 // Load profile and photos
 async function loadProfile() {
     try {
@@ -308,6 +373,9 @@ addPhotoForm.addEventListener('submit', async (e) => {
 const photoDetailModal = document.getElementById('photoDetailModal');
 const closeDetailModal = document.getElementById('closeDetailModal');
 const deletePhotoBtn = document.getElementById('deletePhotoBtn');
+const likeBtn = document.getElementById('likeBtn');
+
+let currentLikeHandler = null;
 
 closeDetailModal.addEventListener('click', () => {
     photoDetailModal.classList.remove('active');
@@ -336,13 +404,20 @@ async function showPhotoDetail(photoId, photo) {
     document.getElementById('viewCount').textContent = views;
     const likeIcon = document.getElementById('likeIcon');
     likeIcon.textContent = hasLiked ? '♥' : '♡';
+    likeBtn.classList.toggle('liked', hasLiked);
+    
+    // Remove old like handler
+    if (currentLikeHandler) {
+        likeBtn.removeEventListener('click', currentLikeHandler);
+    }
     
     // Like button handler
-    const likeBtn = document.getElementById('likeBtn');
-    likeBtn.onclick = async () => {
+    currentLikeHandler = async () => {
         try {
             const photoRef = doc(db, 'photos', photoId);
-            if (hasLiked) {
+            const currentHasLiked = photo.likes && photo.likes.includes(currentUser.uid);
+            
+            if (currentHasLiked) {
                 await updateDoc(photoRef, {
                     likes: arrayRemove(currentUser.uid)
                 });
@@ -351,13 +426,18 @@ async function showPhotoDetail(photoId, photo) {
                     likes: arrayUnion(currentUser.uid)
                 });
             }
-            const updatedPhoto = (await getDoc(photoRef)).data();
+            
+            const updatedPhotoDoc = await getDoc(photoRef);
+            const updatedPhoto = updatedPhotoDoc.data();
             await showPhotoDetail(photoId, updatedPhoto);
             await loadPhotos();
         } catch (error) {
             console.error('Error toggling like:', error);
+            alert('Error al dar like');
         }
     };
+    
+    likeBtn.addEventListener('click', currentLikeHandler);
     
     // Increment views
     try {
